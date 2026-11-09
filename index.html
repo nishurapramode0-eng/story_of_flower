@@ -193,14 +193,16 @@ Even though life gave you thorns, you chose to bloom..."></textarea>
 </div>
 
 <script>
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://PASTE_YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "PASTE_YOUR_PROJECT",
-  storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyC3zLA-vbeDNZr6s3RX2j1QNIxw6OWQnYo",
+  authDomain: "our-world-9bc8c.firebaseapp.com",
+  databaseURL: "https://our-world-9bc8c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "our-world-9bc8c",
+  storageBucket: "our-world-9bc8c.firebasestorage.app",
+  messagingSenderId: "913691294233",
+  appId: "1:913691294233:web:58dfb61cf1236b24a34888",
+  measurementId: "G-EKD0L7LYB9"
 };
 let db = null;
 try{ firebase.initializeApp(firebaseConfig); db = firebase.database(); }catch(e){ console.log("Firebase not setup yet, using local mode", e); }
