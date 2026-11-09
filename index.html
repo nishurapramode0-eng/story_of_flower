@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The story of a flower born on a stem full of thorns</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@400;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--lav:#E6D6FF;--lav2:#D9B8FF;--pink:#FFB6D9;--pink2:#FF8FC0;--white:#FFF9FC;--text:#5A3A6B}
+body{background:linear-gradient(180deg,#FFF9FC,#FFE9F3 40%,#E6D6FF);font-family:'Quicksand',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden}
+.hearts{position:fixed;inset:0;pointer-events:none;z-index:0}
+.hearts span{position:absolute;animation:float 6s infinite;opacity:.5}
+@keyframes float{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(-100vh) rotate(30deg)}}
+#loginPage{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;padding:20px}
+.login-card{background:rgba(255,255,255,.92);backdrop-filter:blur(10px);padding:40px 32px;border-radius:28px;box-shadow:0 20px 50px rgba(217,184,255,.5);text-align:center;max-width:420px;width:100%;border:2px solid #FFD1E8}
+.login-card h1{font-family:'Great Vibes',cursive;font-size:48px;color:#B565D8;line-height:1.1}
+.login-card p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;margin:10px 0 22px;color:#8A5AA0}
+.login-card input{width:100%;padding:14px 18px;border:2px solid var(--lav2);border-radius:50px;outline:none;font-size:16px;text-align:center;background:#FFF9FC}
+.login-card button{margin-top:16px;width:100%;padding:14px;border:none;border-radius:50px;background:linear-gradient(90deg,#D9B8FF,#FF8FC0);color:white;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(255,143,192,.4)}
+#error{color:#FF5A8A;font-size:13px;margin-top:10px;display:none}
+.hint{font-size:12px;margin-top:12px;opacity:.6}
+.pass-wrap{position:relative}
+.pass-wrap input{padding-right:50px}
+.eye-btn{position:absolute !important;right:10px !important;top:50% !important;transform:translateY(-50%) !important;width:40px !important;padding:0 !important;margin:0 !important;background:none !important;box-shadow:none !important;font-size:20px !important;cursor:pointer}
+#mainPage{display:none;position:relative;z-index:2;max-width:1000px;margin:0 auto;padding:24px 16px 80px}
+header{text-align:center;padding:30px 10px 10px}
+header h1{font-family:'Great Vibes',cursive;font-size:56px;line-height:1;color:#9B4DC4}
+header h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:400;font-size:22px;color:#C06AA8;margin-top:6px}
+.divider{text-align:center;font-size:22px;margin:12px 0;letter-spacing:8px}
+.card{background:rgba(255,255,255,.88);border:2px solid #FFE0EE;border-radius:24px;padding:24px;margin:18px 0;box-shadow:0 12px 30px rgba(217,184,255,.35)}
+.card h3{font-family:'Great Vibes',cursive;font-size:32px;color:#B565D8;margin-bottom:6px}
+.card p.sub{font-size:13px;opacity:.7;margin-bottom:12px}
+textarea,input[type=text]{width:100%;border:2px solid #E6D6FF;border-radius:16px;padding:14px;font-family:'Cormorant Garamond',serif;font-size:19px;background:#FFFDFE;outline:none;resize:vertical;color:#4A2A5A}
+textarea:focus{border-color:#FF8FC0}
+.btn{border:none;padding:12px 22px;border-radius:50px;background:linear-gradient(90deg,#C99AFF,#FF8FC0);color:white;font-weight:700;cursor:pointer;margin-top:12px}
+.btn2{background:white;color:#B565D8;border:2px solid #FFB6D9}
+.btn-del{background:white;color:#FF5A8A;border:2px solid #FFB6D9}
+.btn-chat{width:100%;padding:15px;border:none;border-radius:50px;background:linear-gradient(90deg,#FF8FC0,#C99AFF);color:white;font-weight:700;font-size:16px;cursor:pointer;margin-top:12px;box-shadow:0 8px 20px rgba(255,143,192,.45)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+.gallery-item{position:relative}
+.gallery img{width:100%;height:160px;object-fit:cover;border-radius:16px;border:3px solid white;box-shadow:0 6px 15px rgba(0,0,0,.1)}
+.del-btn{position:absolute;top:6px;right:6px;width:28px;height:28px;border:none;border-radius:50%;background:#FF5A8A;color:white;cursor:pointer;font-size:14px;z-index:2}
+.del-small{background:#FFE0EE;border:none;padding:6px 12px;border-radius:20px;cursor:pointer;color:#B565D8;font-size:12px;font-weight:700;margin-top:8px}
+.del-one{background:#FFE0EE;border:none;padding:8px 14px;border-radius:20px;cursor:pointer;color:#FF5A8A;font-size:13px;font-weight:700;margin-top:8px}
+.letters-list{display:flex;flex-direction:column;gap:14px}
+.letter-item{background:#FFF0F7;padding:16px;border-radius:18px;border-left:5px solid #FF8FC0;position:relative}
+.letter-item b{font-family:'Great Vibes',cursive;font-size:24px;color:#9B4DC4}
+.letter-item p{font-family:'Cormorant Garamond',serif;font-size:18px;margin-top:4px;white-space:pre-wrap}
+footer{text-align:center;margin-top:30px;font-family:'Great Vibes',cursive;font-size:26px;color:#B565D8}
+@media(max-width:600px){header h1{font-size:42px}.login-card h1{font-size:38px}}
+.chat-switch{display:flex;gap:8px;margin-bottom:12px}
+.chat-switch button{flex:1;padding:11px;border-radius:50px;border:2px solid #FFB6D9;background:white;font-weight:700;cursor:pointer;color:#8A5AA0}
+.chat-switch button.active{background:linear-gradient(90deg,#C99AFF,#FF8FC0);color:white;border-color:transparent}
+.chat-box{height:360px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:#FFF9FC;border:2px solid #FFE0EE;border-radius:18px}
+.chat-msg{max-width:80%;padding:11px 14px;border-radius:18px;font-size:15px;line-height:1.4;animation:pop .25s ease;position:relative}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.chat-msg.left{background:#EDE3FF;border-bottom-left-radius:4px;align-self:flex-start}
+.chat-msg.right{background:linear-gradient(90deg,#FFB6D9,#FF8FC0);color:white;border-bottom-right-radius:4px;align-self:flex-end}
+.chat-msg b{font-size:11px;display:block;margin-bottom:3px;opacity:.7}
+.chat-msg span{font-size:10px;opacity:.6;display:block;text-align:right;margin-top:4px}
+.chat-msg img{width:100%;border-radius:12px;margin-top:6px}
+.chat-msg .del-chat{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;border:none;background:#FF5A8A;color:white;font-size:11px;cursor:pointer;display:none}
+.chat-msg:hover .del-chat{display:block}
+.chat-input{display:flex;gap:8px;margin-top:12px;align-items:center}
+.chat-input input[type=text]{flex:1;border-radius:50px;padding:13px 16px;font-size:15px;font-family:'Quicksand'}
+.chat-send{width:50px;height:50px;border:none;border-radius:50%;background:linear-gradient(135deg,#C99AFF,#FF8FC0);color:white;font-size:20px;cursor:pointer;flex-shrink:0}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.quick button{border:none;background:#FFF0F7;padding:7px 12px;border-radius:20px;font-size:12px;cursor:pointer;color:#B565D8}
+.typing{font-size:12px;color:#B565D8;margin-top:6px;display:none}
+#chatCard{display:none}
+.close-chat{background:white;color:#B565D8;border:2px solid #FFB6D9;padding:8px 16px;border-radius:50px;cursor:pointer;font-weight:700;float:right}
+.status-dot{width:10px;height:10px;background:#4ADE80;border-radius:50%;display:inline-block}
+.online-text{font-size:13px;color:#4A2A5A}
+.you-are{text-align:center;background:#FFF0F7;padding:10px;border-radius:20px;margin-bottom:12px;font-weight:700;color:#B565D8;border:1px dashed #FFB6D9}
+.del-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99;display:none;align-items:center;justify-content:center;padding:20px}
+.del-box{background:white;border-radius:22px;padding:22px;width:100%;max-width:320px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.del-box h4{font-size:18px;color:#5A3A6B;margin-bottom:4px}
+.del-box p{font-size:13px;opacity:.6;margin-bottom:14px}
+.del-box button{width:100%;padding:13px;border:none;border-radius:50px;font-weight:700;cursor:pointer;margin-top:8px;font-size:14px}
+.del-me-btn{background:#EDE3FF !important;color:#5A3A6B !important}
+.del-everyone-btn{background:linear-gradient(90deg,#FF5A8A,#FF8FC0) !important;color:white !important}
+.del-cancel-btn{background:white !important;color:#B565D8 !important;border:2px solid #FFB6D9 !important}
+</style>
+</head>
+<body>
+<div class="hearts" id="hearts"></div>
+
+<div id="delOverlay" class="del-overlay" onclick="closeDeleteMenu()">
+  <div class="del-box" onclick="event.stopPropagation()">
+    <div style="font-size:32px">🗑️</div>
+    <h4>Delete this message?</h4>
+    <p>කොහොමද delete කරන්න ඕනේ?</p>
+    <button class="del-me-btn" onclick="deleteForMe()">🙈 Delete for Me</button>
+    <p style="font-size:11px;margin:4px 0 0">ඔයාට විතරක් මැකෙනවා</p>
+    <button class="del-everyone-btn" onclick="deleteForEveryone()">💔 Delete for Everyone</button>
+    <p style="font-size:11px;margin:4px 0 0">දෙන්නටම මැකෙනවා</p>
+    <button class="del-cancel-btn" onclick="closeDeleteMenu()">Cancel</button>
+  </div>
+</div>
+
+<div id="loginPage">
+  <div class="login-card">
+    <div style="font-size:42px">🌸</div>
+    <h1>The story of a flower<br>born on a stem<br>full of thorns</h1>
+    <p>Even with thorns, you bloomed beautifully.</p>
+    <div class="pass-wrap">
+      <input type="password" id="pass" placeholder="Enter our secret password 💌" />
+      <button type="button" onclick="togglePass()" id="eyeBtn" class="eye-btn">👁️</button>
+    </div>
+    <button onclick="checkPass()">Enter My Heart 💖</button>
+    <div id="error">Wrong password... try again my flower 🌸</div>
+    <div class="hint">Hint: password is <b> my fv name +my pin number </b></div>
+  </div>
+</div>
+
+<div id="mainPage">
+  <header>
+    <div style="font-size:36px">🌷 ✨ 🌸</div>
+    <h1>The story of a flower born on a stem full of thorns</h1>
+    <h2>"I have to bid farewell to the memories, but my heart is still tied to yours."</h2>
+    <div class="divider">💜 🌸 💖 🌸 💜</div>
+    <div class="online-text"><span class="status-dot"></span> <span id="onlineCount">Connecting...</span></div>
+  </header>
+
+  <div class="card">
+    <h3>💌 Write a Letter...</h3>
+    <p class="sub">Type from your heart. Send කරපුවාම පහල Saved Letters වල පෙන්නනවා.</p>
+    <input type="text" id="letterTo" placeholder="To: My Dearest Flower..." style="margin-bottom:10px">
+    <textarea id="letterInput" rows="6" placeholder="My dearest...
+
+Even though life gave you thorns, you chose to bloom..."></textarea>
+    <button class="btn" onclick="saveLetter()">Send Letter With Love 💖</button>
+    <button class="btn btn-del" onclick="deleteWrittenLetter()">🗑️ Delete Written Letter</button>
+  </div>
+
+  <div class="card">
+    <h3>💬 Messages & Memories</h3>
+    <p class="sub">Small messages, big feelings.</p>
+    <textarea id="msgInput" rows="3" placeholder="Write a short message... e.g. I miss you, but I'm proud of you..."></textarea>
+    <button class="btn" onclick="addMessage()">Post Message 🌸</button>
+    <button class="btn-chat" onclick="openChat()">💬 Open Our Private Chat 💜 →</button>
+    <p style="text-align:center;font-size:12px;opacity:.6;margin-top:8px">මේ Button එක ඔබපුවාම දෙන්නෙක් අතර Chat එක open වෙනවා 🌸</p>
+    <div class="letters-list" id="msgList" style="margin-top:16px"></div>
+    <button class="btn btn2" onclick="clearAllMessages()">🗑️ Clear All Messages</button>
+  </div>
+
+  <div class="card" id="chatCard">
+    <button class="close-chat" onclick="closeChat()">✖ Close</button>
+    <h3>💬 Our Private Chat...</h3>
+    <p class="sub">දෙන්නෙක් අතර ඇත්ත chat එක. ඔයා කවුද කියලා තෝරන්න. <span id="typingStatus"></span></p>
+    <div id="youAre" class="you-are">You are chatting as: 🌸 ranuuu</div>
+    <div class="chat-switch">
+      <button id="chatBtn1" class="active" onclick="setSender(1)">🌸 ranuuu</button>
+      <button id="chatBtn2" onclick="setSender(2)">🌷 nishura</button>
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="typing" id="typing">Typing...</div>
+    <div class="quick">
+      <button onclick="quickChat('I miss you 🥺💜')">I miss you 🥺</button>
+      <button onclick="quickChat('Good night my flower 🌙🌸')">Good Night 🌙</button>
+      <button onclick="quickChat('I love you so much 💖')">I love you 💖</button>
+      <button onclick="clearChat()">Clear Chat 🗑️</button>
+    </div>
+    <div class="chat-input">
+      <label for="chatPhoto" style="font-size:24px;cursor:pointer">📸</label>
+      <input type="file" id="chatPhoto" accept="image/*" hidden>
+      <input type="text" id="chatInput" placeholder="ranuuu ලෙස type කරන්න... 💌" />
+      <button class="chat-send" onclick="sendChat()">💌</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📸 Our Photos</h3>
+    <p class="sub">Upload our favourite memories. They stay here safely. ❌ ඔබලා delete කරන්න පුලුවන්.</p>
+    <input type="file" id="photoInput" accept="image/*" multiple style="border:none;padding:0">
+    <br><button class="btn" onclick="document.getElementById('photoInput').click()">Choose Photos 💗</button>
+    <button class="btn btn2" onclick="clearAllPhotos()">🗑️ Delete All Photos</button>
+    <div class="gallery" id="gallery"></div>
+  </div>
+
+  <div class="card">
+    <h3>📜 Saved Letters</h3>
+    <p class="sub" id="letterCount">Letters: 0</p>
+    <div class="letters-list" id="savedLetters"></div>
+    <button class="btn btn-del" onclick="deleteSingleLetter()">🗑️ Delete One Letter</button>
+    <button class="btn btn2" onclick="clearAllLetters()">🗑️ Delete All Letters</button>
+  </div>
+
+  <footer>Forever tied, even apart... 💜🌸</footer>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "PASTE_YOUR_API_KEY",
+  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://PASTE_YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "PASTE_YOUR_PROJECT",
+  storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
+  messagingSenderId: "PASTE_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+let db = null;
+try{ firebase.initializeApp(firebaseConfig); db = firebase.database(); }catch(e){ console.log("Firebase not setup yet, using local mode", e); }
+
+const heartsBox=document.getElementById('hearts');
+for(let i=0;i<25;i++){let s=document.createElement('span');s.innerHTML=['💜','🌸','💖','🌷','✨'][Math.floor(Math.random()*5)];s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';s.style.fontSize=(12+Math.random()*20)+'px';s.style.animationDelay=(Math.random()*5)+'s';heartsBox.appendChild(s);}
+
+function togglePass(){
+  let p = document.getElementById('pass');
+  let eye = document.getElementById('eyeBtn');
+  if(p.type === 'password'){ p.type = 'text'; eye.innerText = '🙈'; }
+  else { p.type = 'password'; eye.innerText = '👁️'; }
+}
+
+function checkPass(){
+  let p=document.getElementById('pass').value.trim().toLowerCase();
+  if(p==='ranu1110'){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('mainPage').style.display='block';
+    window.scrollTo(0,0);
+    startRealtime();
+  }else{ document.getElementById('error').style.display='block'; }
+}
+document.getElementById('pass').addEventListener('keypress',e=>{if(e.key==='Enter') checkPass()});
+function esc(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+function updateLetterCount(){
+  let c=document.querySelectorAll('#savedLetters .letter-item').length;
+  document.getElementById('letterCount').innerText='Letters: '+c + (c===1 ? ' - එක letter එකක් තියෙනවා, delete කරන්න පුලුවන් 💜' : '');
+}
+
+function saveLetter(){
+  let to=document.getElementById('letterTo').value || 'My Dearest Flower';
+  let text=document.getElementById('letterInput').value;
+  if(!text.trim()) return alert('Write something first my love 💌');
+  if(db) db.ref('flowerApp/letters').push({to:to, text:text, time:Date.now()});
+  else addLetterToUI('local_'+Date.now(), to, text);
+  document.getElementById('letterInput').value='';
+  document.getElementById('letterTo').value='';
+}
+function deleteWrittenLetter(){
+  let text=document.getElementById('letterInput').value;
+  if(!text.trim()){ alert('Delete කරන්න letter එකක් නැහැ 🥺'); return; }
+  if(!confirm('ලියපු letter එක delete කරන්නද? 🥺')) return;
+  document.getElementById('letterInput').value='';
+  document.getElementById('letterTo').value='';
+}
+function addLetterToUI(id, to, text){
+  if(document.getElementById('letter-'+id)) return;
+  let div=document.createElement('div');div.className='letter-item';div.id='letter-'+id;
+  div.setAttribute('data-id', id);
+  div.innerHTML='<b>'+esc(to)+'</b><p>'+esc(text)+'</p><button class="del-one" onclick="deleteLetter(\''+id+'\')">🗑️ Delete This Letter</button>';
+  document.getElementById('savedLetters').prepend(div);
+  updateLetterCount();
+}
+function deleteLetter(id){
+  if(!confirm('මේ letter එක delete කරන්නද? 🥺')) return;
+  let el=document.getElementById('letter-'+id);
+  if(el) el.remove();
+  updateLetterCount();
+  if(db && !id.startsWith('local_')) db.ref('flowerApp/letters/'+id).remove();
+}
+function deleteSingleLetter(){
+  let items=document.querySelectorAll('#savedLetters .letter-item');
+  if(items.length===0){ alert('Delete කරන්න letter එකක් නැහැ 🥺'); return; }
+  if(!confirm(items.length===1 ? 'එක letter එකක් තියෙනවා, ඒක delete කරන්නද? 🥺' : 'අලුත්ම letter එක delete කරන්නද? 🥺')) return;
+  let first=items[0];
+  let id=first.getAttribute('data-id');
+  if(id) deleteLetterWithoutConfirm(id);
+  else first.remove();
+  updateLetterCount();
+}
+function deleteLetterWithoutConfirm(id){
+  let el=document.getElementById('letter-'+id);
+  if(el) el.remove();
+  if(db && !id.startsWith('local_')) db.ref('flowerApp/letters/'+id).remove();
+}
+function clearAllLetters(){
+  if(!confirm('Letters ඔක්කොම delete කරන්නද?')) return;
+  if(db) db.ref('flowerApp/letters').remove();
+  document.getElementById('savedLetters').innerHTML='';
+  updateLetterCount();
+}
+
+function addMessage(){
+  let t=document.getElementById('msgInput').value;
+  if(!t.trim()) return;
+  if(db) db.ref('flowerApp/messages').push({text:t, time:Date.now()});
+  else addMessageToUI('local_'+Date.now(), t);
+  document.getElementById('msgInput').value='';
+}
+function addMessageToUI(id, text){
+  let div=document.createElement('div');div.className='letter-item';div.id='msg-'+id;
+  div.innerHTML='<b>Message 💌</b><p>'+esc(text)+'</p><button class="del-small" onclick="deleteMessage(\''+id+'\')">🗑️ Delete</button>';
+  document.getElementById('msgList').prepend(div);
+}
+function deleteMessage(id){
+  if(!confirm('Delete this message?')) return;
+  if(db && !id.startsWith('local_')) db.ref('flowerApp/messages/'+id).remove();
+  document.getElementById('msg-'+id)?.remove();
+}
+function clearAllMessages(){
+  if(!confirm('Messages ඔක්කොම delete කරන්නද?')) return;
+  if(db) db.ref('flowerApp/messages').remove();
+  document.getElementById('msgList').innerHTML='';
+}
+
+document.getElementById('photoInput').addEventListener('change',function(e){
+  [...e.target.files].forEach(file=>{
+    let r=new FileReader();
+    r.onload=ev=>{
+      if(db) db.ref('flowerApp/photos').push({src:ev.target.result, time:Date.now()});
+      else addPhotoToUI('local_'+Date.now(), ev.target.result);
+    };
+    r.readAsDataURL(file);
+  });
+});
+function addPhotoToUI(id, src){
+  let wrap=document.createElement('div');wrap.className='gallery-item';wrap.id='photo-'+id;
+  wrap.innerHTML='<button class="del-btn" onclick="deletePhoto(\''+id+'\')">✖</button><img src="'+src+'">';
+  document.getElementById('gallery').prepend(wrap);
+}
+function deletePhoto(id){
+  if(!confirm('මේ photo එක delete කරන්නද? 🥺')) return;
+  if(db && !id.startsWith('local_')) db.ref('flowerApp/photos/'+id).remove();
+  document.getElementById('photo-'+id)?.remove();
+}
+function clearAllPhotos(){
+  if(!confirm('Photos ඔක්කොම delete කරන්නද?')) return;
+  if(db) db.ref('flowerApp/photos').remove();
+  document.getElementById('gallery').innerHTML='';
+}
+
+function openChat(){
+  let c=document.getElementById('chatCard');
+  c.style.display='block';
+  c.scrollIntoView({behavior:'smooth'});
+  setTimeout(()=>{ document.getElementById('chatInput').focus(); },500);
+}
+function closeChat(){ document.getElementById('chatCard').style.display='none'; }
+
+let sender=1;
+let chatNames={1:"🌸 ranuuu",2:"🌷 nishura"};
+let chatMessages = {};
+let deletedForMe = [];
+try{ deletedForMe = JSON.parse(localStorage.getItem('deletedForMeChat')||'[]'); }catch(e){ deletedForMe=[]; }
+function saveDeletedForMe(){ localStorage.setItem('deletedForMeChat', JSON.stringify(deletedForMe)); }
+
+function setSender(n){
+  sender=n;
+  document.getElementById('chatBtn1').classList.toggle('active',n===1);
+  document.getElementById('chatBtn2').classList.toggle('active',n===2);
+  document.getElementById('chatInput').placeholder = chatNames[n] + " ලෙස type කරන්න... 💌";
+  document.getElementById('youAre').innerText = "You are chatting as: " + chatNames[n];
+  renderChat();
+  if(db) db.ref('flowerApp/typing').set('');
+}
+function getTime(){
+  let d=new Date(); let h=d.getHours(); let m=d.getMinutes().toString().padStart(2,'0');
+  let ap=h>=12?'PM':'AM'; h=h%12||12; return h+":"+m+" "+ap;
+}
+function renderChat(){
+  let box=document.getElementById('chatBox');
+  box.innerHTML='';
+  let keys = Object.keys(chatMessages).sort((a,b)=> (chatMessages[a].ts||0)-(chatMessages[b].ts||0));
+  keys.forEach(id=>{
+    if(deletedForMe.includes(id)) return;
+    let v=chatMessages[id];
+    let div=document.createElement('div');
+    let isMine = (v.who === sender);
+    div.className='chat-msg '+(isMine?'right':'left');
+    div.id='chat-'+id;
+    let imgHtml=v.img?`<img src="${v.img}">`:'';
+    div.innerHTML=`<button class="del-chat" onclick="openDeleteMenu('${id}')">✖</button><b>${chatNames[v.who]}</b>${v.text?esc(v.text):''}${imgHtml}<span>${v.time||getTime()} ✓✓</span>`;
+    box.appendChild(div);
+  });
+  box.scrollTop=box.scrollHeight;
+}
+function addChatToUI(id, who, text, imgSrc, timeStr, ts){
+  chatMessages[id]={who:who, text:text, img:imgSrc, time:timeStr, ts:ts||Date.now()};
+  renderChat();
+}
+
+// ===== DELETE FOR ME / FOR EVERYONE - NO CONFIRM =====
+let currentDeleteId = null;
+function openDeleteMenu(id){
+  currentDeleteId = id;
+  document.getElementById('delOverlay').style.display='flex';
+}
+function closeDeleteMenu(){
+  currentDeleteId = null;
+  document.getElementById('delOverlay').style.display='none';
+}
+function deleteForMe(){
+  if(!currentDeleteId) return;
+  let id = currentDeleteId;
+  if(!deletedForMe.includes(id)) deletedForMe.push(id);
+  saveDeletedForMe();
+  document.getElementById('chat-'+id)?.remove();
+  renderChat();
+  closeDeleteMenu();
+  // ❌ confirm නැහැ - කෙලින්ම delete වෙනවා
+}
+function deleteForEveryone(){
+  if(!currentDeleteId) return;
+  let id = currentDeleteId;
+  // ❌ confirm නැහැ - කෙලින්ම delete වෙනවා
+  if(db && !id.startsWith('local_')) db.ref('flowerApp/chat/'+id).remove();
+  delete chatMessages[id];
+  deletedForMe = deletedForMe.filter(x=>x!==id);
+  saveDeletedForMe();
+  renderChat();
+  closeDeleteMenu();
+}
+function deleteChat(id){ openDeleteMenu(id); }
+
+function sendChat(){
+  let inp=document.getElementById('chatInput');
+  let t=inp.value.trim();
+  if(!t) return;
+  if(db) db.ref('flowerApp/chat').push({who:sender, text:t, time:getTime(), ts:Date.now()});
+  else addChatToUI('local_'+Date.now(), sender, t, null, getTime(), Date.now());
+  inp.value='';
+  if(db) db.ref('flowerApp/typing').set('');
+}
+function quickChat(text){
+  if(db) db.ref('flowerApp/chat').push({who:sender, text:text, time:getTime(), ts:Date.now()});
+  else addChatToUI('local_'+Date.now(), sender, text, null, getTime(), Date.now());
+}
+function clearChat(){
+  if(!confirm('Chat එකම clear කරන්නද? 🥺')) return;
+  if(db) db.ref('flowerApp/chat').remove();
+  chatMessages={};
+  deletedForMe=[];
+  saveDeletedForMe();
+  renderChat();
+}
+document.getElementById('chatInput').addEventListener('keypress',e=>{if(e.key==='Enter') sendChat()});
+document.getElementById('chatInput').addEventListener('input',()=>{
+  if(db) db.ref('flowerApp/typing').set(chatNames[sender]+' is typing...');
+});
+document.getElementById('chatPhoto').addEventListener('change',function(e){
+  let file=e.target.files[0]; if(!file) return;
+  let r=new FileReader();
+  r.onload=ev=>{
+    if(db) db.ref('flowerApp/chat').push({who:sender, text:"📸 Photo with love 💖", img:ev.target.result, time:getTime(), ts:Date.now()});
+    else addChatToUI('local_'+Date.now(), sender, "📸 Photo with love 💖", ev.target.result, getTime(), Date.now());
+  };
+  r.readAsDataURL(file);
+});
+
+function startRealtime(){
+  if(!db){
+    document.getElementById('onlineCount').innerText='Local Mode - Firebase config දාන්න';
+    return;
+  }
+  document.getElementById('onlineCount').innerText='Connected 💖 Both Online';
+  db.ref('flowerApp/chat').on('child_added', snap=>{ let v=snap.val(); addChatToUI(snap.key, v.who, v.text, v.img, v.time, v.ts); });
+  db.ref('flowerApp/chat').on('child_removed', snap=>{ delete chatMessages[snap.key]; renderChat(); });
+  db.ref('flowerApp/chat').on('value', snap=>{ if(!snap.exists()){ chatMessages={}; renderChat(); } });
+  db.ref('flowerApp/letters').on('child_added', snap=>{ let v=snap.val(); if(!document.getElementById('letter-'+snap.key)) addLetterToUI(snap.key, v.to, v.text); });
+  db.ref('flowerApp/letters').on('child_removed', snap=>{ document.getElementById('letter-'+snap.key)?.remove(); updateLetterCount(); });
+  db.ref('flowerApp/letters').on('value', snap=>{ if(!snap.exists()){ document.getElementById('savedLetters').innerHTML=''; updateLetterCount(); } });
+  db.ref('flowerApp/messages').on('child_added', snap=>{ let v=snap.val(); if(!document.getElementById('msg-'+snap.key)) addMessageToUI(snap.key, v.text); });
+  db.ref('flowerApp/messages').on('child_removed', snap=>{ document.getElementById('msg-'+snap.key)?.remove(); });
+  db.ref('flowerApp/photos').on('child_added', snap=>{ let v=snap.val(); if(!document.getElementById('photo-'+snap.key)) addPhotoToUI(snap.key, v.src); });
+  db.ref('flowerApp/photos').on('child_removed', snap=>{ document.getElementById('photo-'+snap.key)?.remove(); });
+  db.ref('flowerApp/typing').on('value', snap=>{
+    let t=snap.val()||'';
+    let el=document.getElementById('typing');
+    if(t && !t.includes(chatNames[sender])){ el.style.display='block'; el.innerText=t; }
+    else el.style.display='none';
+  });
+  let presenceRef = db.ref('flowerApp/online');
+  presenceRef.on('value', snap=>{
+    let count = snap.numChildren();
+    document.getElementById('onlineCount').innerText = count>=2 ? 'Both Online 💖💖' : count===1 ? '1 Online - Waiting for your flower...' : 'Connecting...';
+  });
+  let myOnline = db.ref('flowerApp/online').push(true);
+  myOnline.onDisconnect().remove();
+}
+</script>
+</body>
+</html>
